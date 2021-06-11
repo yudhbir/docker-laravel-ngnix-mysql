@@ -1,0 +1,61 @@
+version: '3.3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: laravel_docker_app
+    container_name: laravel_docker_app
+    restart: unless-stopped
+    tty: true
+    volumes:
+      - ./:/var/www/html/
+      - ./php/laravel.ini:/usr/local/etc/php/conf.d/laravel.ini
+    environment:
+        SERVICE_NAME: laravel_docker_app
+        SERVICE_TAGS: dev
+    working_dir: /var/www/html/
+    networks:
+        laravel_docker_app_network:
+            ipv4_address: 187.83.0.4
+  webserver:
+      image: nginx:alpine
+      container_name: laravel_docker_webserver
+      restart: unless-stopped
+      tty: true
+      volumes:
+        - ./:/var/www/html/
+        - ./nginx/conf.d/:/etc/nginx/conf.d/
+      ports:
+          - "8080:80"
+          - "447:443"
+      networks:
+          laravel_docker_app_network:
+              ipv4_address: 187.83.0.5
+  db:
+      image: mysql:5.7.32
+      container_name: laravel_docker_db
+      restart: unless-stopped
+      tty: true
+      volumes:
+        - dbdata:/var/lib/mysql/
+        - ./mysql/my.cnf:/etc/mysql/my.cnf
+      ports:
+          - "3308:3306"
+      environment:
+          MYSQL_DATABASE: laravel_docker_app
+          MYSQL_ROOT_PASSWORD: laraveldockerapproot
+          MYSQL_USER: laravel_docker_app
+          MYSQL_PASSWORD: laravel_docker_app
+      networks:
+          laravel_docker_app_network:
+              ipv4_address: 187.83.0.6
+volumes:
+  dbdata:
+    driver: local
+networks:
+    laravel_docker_app_network:
+        ipam:
+            driver: default
+            config:
+                - subnet: 187.83.0.0/16
