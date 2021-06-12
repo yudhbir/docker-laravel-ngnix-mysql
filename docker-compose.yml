@@ -50,6 +50,20 @@ services:
       networks:
           laravel_docker_app_network:
               ipv4_address: 187.83.0.6
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: laravel_docker_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: 187.83.0.6
+      PMA_USER: laravel_docker_app
+      PMA_PASSWORD: laravel_docker_app
+    ports:
+      - "8090:80"
+    networks:
+          laravel_docker_app_network:
+              ipv4_address: 187.83.0.8
+
 volumes:
   dbdata:
     driver: local
